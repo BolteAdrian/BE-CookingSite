@@ -6,6 +6,10 @@ import com.programming.techie.springngblog.model.Post;
 import com.programming.techie.springngblog.repository.PostRepository;
 import com.programming.techie.springngblog.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +31,50 @@ public class PostService {
     public List<PostDto> showAllPosts() {
         List<Post> posts = postRepository.findAll();
         return posts.stream().map(this::mapFromPostToDto).collect(toList());
+    }
+
+    @Transactional
+    public List<PostDto> showAllPostsPaginated(String searchTerm, int pageNo, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        Specification<Post> spec = getSearchSpecification(searchTerm);
+        Page<Post> posts = postRepository.findAll(spec, pageable);
+        return posts.stream().map(this::mapFromPostToDto).collect(toList());
+    }
+
+    private Specification<Post> getSearchSpecification(String searchTerm) {
+        return (root, query, criteriaBuilder) -> {
+            if (searchTerm == null || searchTerm.isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+
+            String likeSearchTerm = "%" + searchTerm.toLowerCase() + "%";
+            return criteriaBuilder.or(
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), likeSearchTerm),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("short_description")), likeSearchTerm),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("category")), likeSearchTerm)
+            );
+        };
+    }
+
+    @Transactional
+    public List<PostDto> showAllPostsByCategory(String searchTerm, int pageNo, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        Specification<Post> spec = getSearchCategory(searchTerm);
+        Page<Post> posts = postRepository.findAll(spec, pageable);
+        return posts.stream().map(this::mapFromPostToDto).collect(toList());
+    }
+
+    private Specification<Post> getSearchCategory(String searchTerm) {
+        return (root, query, criteriaBuilder) -> {
+            if (searchTerm == null || searchTerm.isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+
+            String likeSearchTerm = "%" + searchTerm.toLowerCase() + "%";
+            return criteriaBuilder.or(
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("category")), likeSearchTerm)
+            );
+        };
     }
 
     @Transactional

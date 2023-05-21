@@ -33,6 +33,24 @@ public class PostController {
         return new ResponseEntity<>(postService.showAllPosts(), HttpStatus.OK);
     }
 
+    @GetMapping("/")
+    public ResponseEntity<List<PostDto>> showAllPostsPaginated(
+            @RequestParam(required = false) String searchTerm,
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize) {
+
+        return new ResponseEntity<>(postService.showAllPostsPaginated(searchTerm, pageNo, pageSize), HttpStatus.OK);
+    }
+
+    @GetMapping("/category")
+    public ResponseEntity<List<PostDto>> showAllPostsByCategory(
+            @RequestParam(required = false) String searchTerm,
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize) {
+
+        return new ResponseEntity<>(postService.showAllPostsByCategory(searchTerm, pageNo, pageSize), HttpStatus.OK);
+    }
+
     @GetMapping("/get/{id}")
     public ResponseEntity<PostDto> getSinglePost(@PathVariable @RequestBody Long id) {
         return new ResponseEntity<>(postService.readSinglePost(id), HttpStatus.OK);
