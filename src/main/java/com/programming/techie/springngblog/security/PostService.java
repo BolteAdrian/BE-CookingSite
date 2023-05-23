@@ -50,7 +50,7 @@ public class PostService {
             String likeSearchTerm = "%" + searchTerm.toLowerCase() + "%";
             return criteriaBuilder.or(
                     criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), likeSearchTerm),
-                    criteriaBuilder.like(criteriaBuilder.lower(root.get("short_description")), likeSearchTerm),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("content")), likeSearchTerm),
                     criteriaBuilder.like(criteriaBuilder.lower(root.get("category")), likeSearchTerm)
             );
         };
